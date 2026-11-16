@@ -1,0 +1,82 @@
+Lab 5 — VPC 练习：交付说明
+================================================
+
+✅ 资源已全部删除（2026-11-10）
+   实例 / NAT 网关 / 弹性 IP / 密钥对 / IGW / 安全组 / 路由表 / 子网 / VPC
+   全部清理完毕，不会再产生费用。
+
+📄 要交的文件
+   Lab5_VPC_screenshots.pdf   —— 4 张截图按顺序，直接传 Moodle
+
+   如果需要分开交，同目录还有 screenshot1~4.png，
+   文件名符合作业要求（screenshot1、screenshot2 ...）
+
+截图对应内容
+   screenshot1  公有子网路由表 rtb-0a42b1a09af8ab579 / lab5-public-rt
+                0.0.0.0/0 -> igw-0529ddfd33cf910ed
+   screenshot2  私有子网路由表 rtb-086ac4fe6ac4db09f / lab5-private-rt
+                0.0.0.0/0 -> nat-04fe7005b5f9b9523
+   screenshot3  NAT 网关 nat-04fe7005b5f9b9523 / lab5-nat
+                State = Available，主要公有 IPv4 = 52.1.203.241
+   screenshot4  从 Bastion(10.0.0.89) 跳到 DBServer(10.0.1.131)，
+                执行 wget http://ipinfo.io/ip -qO -
+                返回 52.1.203.241 ← 与 screenshot3 的弹性 IP 一致
+
+（下面保留建资源时的记录，仅供参考）
+Lab 5 — VPC 练习：资源清单 & 剩余截图指引
+================================================
+
+我（AI）已经建好的资源
+------------------------
+VPC          vpc-0d0c2014de097ffbb      (10.0.0.0/16)   名字标签 lab5-vpc
+公有子网      subnet-0a55db8bbbb406de1   (10.0.0.0/24, us-east-1a)  lab5-public-subnet
+私有子网      subnet-0d74a965b9670ffeb   (10.0.1.0/24, us-east-1a)  lab5-private-subnet
+Internet 网关 igw-0529ddfd33cf910ed
+NAT 网关      nat-04fe7005b5f9b9523      弹性 IP = 52.1.203.241
+公有路由表    rtb-0a42b1a09af8ab579      lab5-public-rt    (0.0.0.0/0 -> igw)
+私有路由表    rtb-086ac4fe6ac4db09f      lab5-private-rt   (0.0.0.0/0 -> nat)
+
+安全组
+  BastionSG   sg-0024ea44ca2245314   22 端口开放
+  WebServerSG sg-075b223085fa61383   22 + 80
+  DBServerSG  sg-01f6f9550cd97aa27   22 只允许来自 BastionSG
+
+实例
+  Bastion     i-058ed5db1ad7a2848   10.0.0.89   公网 44.206.231.80
+  WebServer   i-0648afade8929cfe6   10.0.0.96   公网 3.88.232.123
+  DBServer    i-0954d8badfe71dc30   10.0.1.131  无公网 IP（正确）
+
+已完成
+------
+screenshot4.png  —— 从 Bastion ssh 到 DBServer，执行
+                    wget http://ipinfo.io/ip -qO -
+                    返回 52.1.203.241，与 NAT 网关弹性 IP 一致
+
+还需要你截 3 张（控制台页面，我这边碰不到你的浏览器）
+----------------------------------------------------
+screenshot1：公有子网的路由表
+  控制台 -> VPC -> Route tables -> 勾选 rtb-0a42b1a09af8ab579 (lab5-public-rt)
+  -> 下方 Routes 标签页，应看到：
+       10.0.0.0/16  local
+       0.0.0.0/0    igw-0529ddfd33cf910ed
+  截图要包含：路由表 ID、名字、Routes 列表、Associated subnets
+
+screenshot2：私有子网的路由表
+  同上，勾选 rtb-086ac4fe6ac4db09f (lab5-private-rt)
+  Routes 应看到：
+       10.0.0.0/16  local
+       0.0.0.0/0    nat-04fe7005b5f9b9523     <-- 关键
+  截图要包含：路由表 ID、名字、Routes 列表、Associated subnets
+
+screenshot3：NAT 网关详情
+  控制台 -> VPC -> NAT gateways -> 点 nat-04fe7005b5f9b9523 (lab5-nat)
+  应看到：State = Available，Subnet = subnet-0a55db8bbbb406de1，
+          Elastic IP = 52.1.203.241   <-- 和第 4 张图对应
+  截图要包含：NAT 网关 ID、State、Subnet、Elastic IP
+
+提交
+----
+单个 PDF（4 张图按顺序）或者 ZIP（screenshot1..4 + 扩展名）。
+不要交 Word，不要交 RAR。不需要文字说明。
+
+⚠️ 截完图请立刻告诉我，我会把 VPC + NAT 网关全部删掉（NAT 约 €1.5/天）。
